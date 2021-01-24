@@ -1,5 +1,5 @@
 // define how the pins are going to be used
-#include <Wire.h>                                                               // Global for amplifier
+#include <Wire.h>                                                                // Global for amplifier
 #define MAX9744_I2CADDR 0x4B
 
 const uint8_t PinSDA = 0;                                                        // I2C data
@@ -21,8 +21,8 @@ void setup()
    pinMode(PinEncoderA, INPUT);                                                  // set the encoder pins as inputs
    pinMode(PinEncoderB, INPUT);                                                  // .
    
-   attachInterrupt(digitalPinToInterrupt(PinEncoderA), IsrEncoderA, CHANGE) ;    // connect encoder pins to interrupt service routines
-   attachInterrupt(digitalPinToInterrupt(PinEncoderB), IsrEncoderB, CHANGE) ;    //  .
+   attachInterrupt(digitalPinToInterrupt(PinEncoderA), IsrEncoderA, FALLING) ;    // connect encoder pins to interrupt service routines
+   attachInterrupt(digitalPinToInterrupt(PinEncoderB), IsrEncoderB, FALLING) ;    //  .
 }
 
 
@@ -38,6 +38,8 @@ void loop()
       // put the i2c code here to set the volume to "position"
       lastPosition = position;                                                   // only write to i2c if the volume changed.   
    }
+   Serial.println(position);
+   delay(10);
 }
 
 /**
@@ -46,15 +48,13 @@ void loop()
  */
 void IsrEncoderA(void)
 {
-   if (digitalRead(PinEncoderB) == digitalRead(PinEncoderA))                    // If pins are same, turning CCW
+   if (digitalRead(PinEncoderB) == 0)                    // If pins are same, turning CCW
    {
       position = position - KnobGain;   // CCW motion of the knob
-      Serial.println("down A");
    }
    else
    {
        position = position + KnobGain;    // CW motion of the knob
-       Serial.println("up A"); 
    }
 }
 
@@ -64,14 +64,14 @@ void IsrEncoderA(void)
  */
 void IsrEncoderB(void)
 {
-     if (digitalRead(PinEncoderA) == digitalRead(PinEncoderB))                 // If pins are same, turning CW
+     if (digitalRead(PinEncoderA) == 0)                 // If pins are same, turning CW
    {
       position = position + KnobGain;     // CW motion of the knob
-      Serial.println("up B");
+    
    }
    else
    {
        position = position - KnobGain;    // CCW motion of the knob
-       Serial.println("down B");
+      
    }
 }
