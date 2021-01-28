@@ -11,6 +11,11 @@ const uint8_t PinEncoderB = 4;                                                  
 const uint8_t KnobGain = 1;                                                      // increase this to make volume change quicker
 uint8_t position = 0;// initial knob position (volume)
 int8_t thevol = 0;
+bool debouncea = true;
+bool debounceb = true;
+const uint32_t waitTime = 5;
+uint32_t timea = 0;                                                              // Inital assignment of these 2 variables
+uint32_t timeb = 0;
 
 /**
  * Setup()
@@ -18,8 +23,8 @@ int8_t thevol = 0;
  */
 void setup() 
 { 
-   pinMode(PinEncoderA, INPUT);                                                  // set the encoder pins as inputs
-   pinMode(PinEncoderB, INPUT);                                                  // .
+   pinMode(PinEncoderA, INPUT_PULLUP);                                                  // set the encoder pins as inputs
+   pinMode(PinEncoderB, INPUT_PULLUP);                                                  // .
    
    attachInterrupt(digitalPinToInterrupt(PinEncoderA), IsrEncoderA, FALLING) ;    // connect encoder pins to interrupt service routines
    attachInterrupt(digitalPinToInterrupt(PinEncoderB), IsrEncoderB, FALLING) ;    //  .
@@ -37,9 +42,26 @@ void loop()
    {
       // put the i2c code here to set the volume to "position"
       lastPosition = position;                                                   // only write to i2c if the volume changed.   
-   }
-   Serial.println(position);
-   delay(10);
+      Serial.println(position/4);
+    }  
+    
+    if (debouncea == false)                                                       // Debounce a wait waitime until 
+    { 
+        uint32_t timeElapsedA = millis();
+        if ((timeElapsedA - timea) >= waitTime)
+        {
+             debouncea = true;
+        }
+    }
+  
+    if (debounceb == false)                                                       // end of subroutine, grab a timestamp
+    { 
+         uint32_t timeElapsedB = millis();
+         if ((millis() - timeb) >= waitTime)
+         {
+              debounceb = true;
+         }
+    }   
 }
 
 /**
@@ -47,15 +69,20 @@ void loop()
  * This gets called on every changing edge of encoder A
  */
 void IsrEncoderA(void)
-{
-   if (digitalRead(PinEncoderB) == 0)                    // If pins are same, turning CCW
-   {
-      position = position - KnobGain;   // CCW motion of the knob
-   }
-   else
-   {
-       position = position + KnobGain;    // CW motion of the knob
-   }
+{ 
+    if (debouncea == true)
+    {
+        if (digitalRead(PinEncoderB) == 0)                    // If pins are same, turning CCW
+        {
+             position = position - KnobGain;   // CCW motion of the knob
+        }
+        else
+        {
+           position = position + KnobGain;    // CW motion of the knob
+        }
+        debouncea = false;
+        timea = millis();
+    }
 }
 
 /**
@@ -63,15 +90,18 @@ void IsrEncoderA(void)
  * This gets called on every changing edge of encoder B
  */
 void IsrEncoderB(void)
-{
-     if (digitalRead(PinEncoderA) == 0)                 // If pins are same, turning CW
-   {
-      position = position + KnobGain;     // CW motion of the knob
-    
-   }
-   else
-   {
-       position = position - KnobGain;    // CCW motion of the knob
-      
-   }
+{ 
+    if (debounceb == true)
+    {
+        if (digitalRead(PinEncoderA) == 0)                 // If pins are same, turning CW
+        {
+            position = position + KnobGain;     // CW motion of the knob
+        }
+        else
+         {
+             position = position - KnobGain;    // CCW motion of the knob    
+         }
+         debounceb = false;
+         timeb = millis();
+    }
 }
