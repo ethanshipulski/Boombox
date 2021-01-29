@@ -23,8 +23,8 @@ uint32_t timeb = 0;
  */
 void setup() 
 { 
-   pinMode(PinEncoderA, INPUT_PULLUP);                                                  // set the encoder pins as inputs
-   pinMode(PinEncoderB, INPUT_PULLUP);                                                  // .
+   pinMode(PinEncoderA, INPUT_PULLUP);                                            // set the encoder pins as inputs
+   pinMode(PinEncoderB, INPUT_PULLUP);                                            // .
    
    attachInterrupt(digitalPinToInterrupt(PinEncoderA), IsrEncoderA, FALLING) ;    // connect encoder pins to interrupt service routines
    attachInterrupt(digitalPinToInterrupt(PinEncoderB), IsrEncoderB, FALLING) ;    //  .
@@ -72,13 +72,20 @@ void IsrEncoderA(void)
 { 
     if (debouncea == true)
     {
-        if (digitalRead(PinEncoderB) == 0)                    // If pins are same, turning CCW
+        if (digitalRead(PinEncoderB) == 0)                    // If B is low, turning CCW
         {
-             position = position - KnobGain;   // CCW motion of the knob
+           if (position >= 255)                               // Only increment if volume is under 255
+            {
+             position = position - KnobGain;                  // CCW motion of the knob
+       
+             }
         }
         else
         {
-           position = position + KnobGain;    // CW motion of the knob
+          if (position <= 0)
+           {
+           position = position + KnobGain;                     // CW motion of the knob
+           }
         }
         debouncea = false;
         timea = millis();
@@ -90,16 +97,22 @@ void IsrEncoderA(void)
  * This gets called on every changing edge of encoder B
  */
 void IsrEncoderB(void)
-{ 
+{
     if (debounceb == true)
     {
-        if (digitalRead(PinEncoderA) == 0)                 // If pins are same, turning CW
+        if (digitalRead(PinEncoderA) == 0)                 // If A is low, turning CW
         {
-            position = position + KnobGain;     // CW motion of the knob
+            if (position >= 255)                           // Only increment if volume is under 255
+              {
+            position = position + KnobGain;                // CW motion of the knob
+              }
         }
         else
          {
-             position = position - KnobGain;    // CCW motion of the knob    
+            if (position <= 0)                              // Only decrement if the volume is over 0
+              {
+             position = position - KnobGain;                // CCW motion of the knob    
+              }
          }
          debounceb = false;
          timeb = millis();
