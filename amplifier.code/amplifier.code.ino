@@ -4,12 +4,14 @@
 
 int8_t thevol = 0;
 
-void setup() {
+void setup() 
+{
   Serial.begin(9600);
   Serial.println("MAX9744 demo");
   Wire.begin();
   
-  if (! setvolume(thevol)) {
+  if (! setvolume(thevol)) 
+  {
     Serial.println("Failed to set volume, MAX9744 not found!");
     while (1);
   }

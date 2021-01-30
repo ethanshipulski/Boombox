@@ -2,6 +2,10 @@
 #include <Wire.h>                                                                // Global for amplifier
 #define MAX9744_I2CADDR 0x4B
 
+// Forward declarations
+void IsrEncoderA(void);
+void IsrEncoderB(void);
+
 const uint8_t PinSDA = 0;                                                        // I2C data
 const uint8_t PinSCL = 2;                                                        // I2C clock
 const uint8_t PinEncoderA = 3;                                                   // set this to the pin connected to encoder-A
@@ -9,8 +13,7 @@ const uint8_t PinEncoderB = 4;                                                  
 
 // define constants
 const uint8_t KnobGain = 1;                                                      // increase this to make volume change quicker
-uint8_t position = 0;// initial knob position (volume)
-int8_t thevol = 0;
+uint8_t position = 0;                                                            // initial knob position (volume)
 bool debouncea = true;
 bool debounceb = true;
 const uint32_t waitTime = 5;
@@ -22,12 +25,17 @@ uint32_t timeb = 0;
  * This runs once after reset.
  */
 void setup() 
-{ 
+{
+
    pinMode(PinEncoderA, INPUT_PULLUP);                                            // set the encoder pins as inputs
    pinMode(PinEncoderB, INPUT_PULLUP);                                            // .
    
    attachInterrupt(digitalPinToInterrupt(PinEncoderA), IsrEncoderA, FALLING) ;    // connect encoder pins to interrupt service routines
    attachInterrupt(digitalPinToInterrupt(PinEncoderB), IsrEncoderB, FALLING) ;    //  .
+
+  Serial.begin(9600);
+  Serial.println("MAX9744 demo");
+  Wire.begin();
 }
 
 
@@ -40,10 +48,14 @@ void loop()
    static uint8_t lastPosition = 0;
    if (lastPosition != position)
    {
-      // put the i2c code here to set the volume to "position"
+                                                                                 // put the i2c code here to set the volume to "position"
+  Wire.beginTransmission(MAX9744_I2CADDR);
+  Wire.write(position/4);
+  Wire.endTransmission();
+    
       lastPosition = position;                                                   // only write to i2c if the volume changed.   
       Serial.println(position/4);
-    }  
+   }
     
     if (debouncea == false)                                                       // Debounce a wait waitime until 
     { 
