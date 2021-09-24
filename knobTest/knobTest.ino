@@ -26,6 +26,9 @@ uint32_t timeb = 0;
  */
 void setup() 
 {
+   Serial.begin(9600);
+   Serial.println("MAX9744 demo");
+   Wire.begin();
 
    pinMode(PinEncoderA, INPUT_PULLUP);                                            // set the encoder pins as inputs
    pinMode(PinEncoderB, INPUT_PULLUP);                                            // .
@@ -33,9 +36,7 @@ void setup()
    attachInterrupt(digitalPinToInterrupt(PinEncoderA), IsrEncoderA, FALLING) ;    // connect encoder pins to interrupt service routines
    attachInterrupt(digitalPinToInterrupt(PinEncoderB), IsrEncoderB, FALLING) ;    //  .
 
-  Serial.begin(9600);
-  Serial.println("MAX9744 demo");
-  Wire.begin();
+  
 }
 
 
