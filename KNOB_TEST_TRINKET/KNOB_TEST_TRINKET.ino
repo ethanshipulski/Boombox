@@ -91,20 +91,20 @@ void loop()
     {
         if (digitalRead(PinEncoderB) == 0)                 // If B is low, turning CW
         {
-            if (position <= 255)                           // Only increment if volume is under 255
+            if (position < 251)                           // Only increment if volume is under 255
               {
             position = position + KnobGain;                // CW motion of the knob
               }
         }
         else
          {
-            if (position >= 0)                              // Only decrement if the volume is over 0
+            if (position > 0)                              // Only decrement if the volume is over 0
               {
              position = position - KnobGain;                // CCW motion of the knob    
               }
          }
          debouncea = false;
-         timeb = millis();
+         timea = millis();
     }
 }
 
@@ -115,14 +115,14 @@ void IsrEncoderB(void)
     {
         if (digitalRead(PinEncoderA) == 1)                 // If A is high, turning CW
         {
-            if (position <= 255)                           // Only increment if volume is under 255
+            if (position < 251)                           // Only increment if volume is under 255
               {
             position = position + KnobGain;                // CW motion of the knob
               }
         }
         else
          {
-            if (position >= 0)                              // Only decrement if the volume is over 0
+            if (position > 1)                              // Only decrement if the volume is over 0
               {
              position = position - KnobGain;                // CCW motion of the knob    
               }
